@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AgentWebBench · Benchmarking Multi-Agent Coordination in the Agentic Web</title>
+<meta name="description" content="AgentWebBench (ICML 2026): the first comprehensive benchmark for evaluating multi-agent coordination in the emerging Agentic Web. 100 websites, 18.4M documents, 7 LLMs, 4 tasks, 3 coordination strategies." />
+<meta name="author" content="Shanshan Zhong, Kate Shen, Chenyan Xiong" />
+
+<!-- Open Graph -->
+<meta property="og:type" content="website" />
+<meta property="og:title" content="AgentWebBench: Benchmarking Multi-Agent Coordination in the Agentic Web" />
+<meta property="og:description" content="A decentralized benchmark where a user agent coordinates with 100 autonomous content agents across web search, recommendation, QA, and deep research." />
+<meta property="og:image" content="assets/figures/introduction.png" />
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='5' fill='%234f46e5'/%3E%3Ccircle cx='5' cy='6' r='2.6' fill='%23f59e0b'/%3E%3Ccircle cx='27' cy='6' r='2.6' fill='%23f59e0b'/%3E%3Ccircle cx='5' cy='26' r='2.6' fill='%23f59e0b'/%3E%3Ccircle cx='27' cy='26' r='2.6' fill='%23f59e0b'/%3E%3Cg stroke='%234f46e5' stroke-width='1.4' opacity='.55'%3E%3Cline x1='16' y1='16' x2='5' y2='6'/%3E%3Cline x1='16' y1='16' x2='27' y2='6'/%3E%3Cline x1='16' y1='16' x2='5' y2='26'/%3E%3Cline x1='16' y1='16' x2='27' y2='26'/%3E%3C/g%3E%3C/svg%3E" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+<!-- ============================= NAV ============================= -->
+<header class="nav" id="nav">
+  <div class="nav__inner">
+    <a href="index.html" class="nav__brand" aria-label="AgentWebBench home">
+      <span class="nav__logo" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="26" height="26">
+          <g class="logo-edges" stroke="currentColor" stroke-width="1.4" opacity=".5">
+            <line x1="16" y1="16" x2="5" y2="6"/><line x1="16" y1="16" x2="27" y2="6"/>
+            <line x1="16" y1="16" x2="5" y2="26"/><line x1="16" y1="16" x2="27" y2="26"/>
+          </g>
+          <circle cx="16" cy="16" r="5" class="logo-hub"/>
+          <circle cx="5" cy="6" r="2.6" class="logo-node"/><circle cx="27" cy="6" r="2.6" class="logo-node"/>
+          <circle cx="5" cy="26" r="2.6" class="logo-node"/><circle cx="27" cy="26" r="2.6" class="logo-node"/>
+        </svg>
+      </span>
+      <span class="nav__name">AgentWeb<b>Bench</b></span>
+    </a>
+
+    <nav class="nav__links" aria-label="Section navigation">
+      <a href="index.html" class="active">Overview</a>
+      <a href="benchmark.html">Benchmark</a>
+      <a href="leaderboard.html">Leaderboard</a>
+    </nav>
+
+    <div class="nav__actions">
+      <a class="btn btn--ghost btn--sm" href="https://github.com/cxcscmu/AgentWebBench" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2 0 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z"/></svg>
+        <span>Code</span>
+      </a>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0-13a1 1 0 0 1 1 1V4a1 1 0 0 1-2 0V5a1 1 0 0 1 1-1zm0 15a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0v-1a1 1 0 0 1 1-1zM4 12a1 1 0 0 1-1 1H2a1 1 0 0 1 0-2h1a1 1 0 0 1 1 1zm18 0a1 1 0 0 1-1 1h-1a1 1 0 0 1 0-2h1a1 1 0 0 1 1 1zM5.6 5.6a1 1 0 0 1 1.4 0l.7.7A1 1 0 1 1 6.3 7.7l-.7-.7a1 1 0 0 1 0-1.4zm11 11a1 1 0 0 1 1.4 0l.7.7a1 1 0 0 1-1.4 1.4l-.7-.7a1 1 0 0 1 0-1.4zm1.4-11a1 1 0 0 1 0 1.4l-.7.7a1 1 0 1 1-1.4-1.4l.7-.7a1 1 0 0 1 1.4 0zm-11 11a1 1 0 0 1 0 1.4l-.7.7a1 1 0 0 1-1.4-1.4l.7-.7a1 1 0 0 1 1.4 0z"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+      <button class="nav__burger" id="navBurger" aria-label="Open menu"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- ============================= HERO ============================= -->
+<section class="hero">
+  <canvas class="hero__canvas" id="heroCanvas" aria-hidden="true"></canvas>
+  <div class="hero__glow" aria-hidden="true"></div>
+  <div class="hero__inner">
+    <a class="hero__venue" href="#cite">
+      <span class="dot"></span> ICML 2026 · Carnegie Mellon University
+    </a>
+    <h1 class="hero__title">AgentWebBench</h1>
+    <p class="hero__tagline">Benchmarking Multi-Agent Coordination in the <span class="grad">Agentic Web</span></p>
+    <p class="hero__lead">
+      As content providers wrap their data behind agent-facing interfaces, web access shifts from
+      <b>centralized retrieval</b> to <b>decentralized coordination</b>. AgentWebBench is the first
+      comprehensive benchmark for this paradigm: a user agent must coordinate with <b>100 autonomous
+      content agents</b> to satisfy real web information needs.
+    </p>
+
+    <ul class="hero__authors" aria-label="Authors">
+      <li><a href="mailto:szhong2@cs.cmu.edu">Shanshan Zhong</a><sup>1</sup></li>
+      <li>Kate Shen<sup>2</sup></li>
+      <li>Chenyan Xiong<sup>1</sup></li>
+    </ul>
+    <p class="hero__affil">
+      <sup>1</sup>Language Technologies Institute, Carnegie Mellon University &nbsp;·&nbsp;
+      <sup>2</sup>Anaxi Labs
+    </p>
+
+    <div class="hero__cta">
+      <a class="btn btn--primary" href="paper/latex/example_paper.pdf" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm0 2 4 4h-4V4zM8 13h8v2H8v-2zm0 4h8v2H8v-2zm0-8h3v2H8V9z"/></svg>
+        Read the Paper
+      </a>
+      <a class="btn btn--dark" href="https://github.com/cxcscmu/AgentWebBench" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path fill="currentColor" d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2 0 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z"/></svg>
+        Code &amp; Data
+      </a>
+      <a class="btn btn--ghost" href="leaderboard.html">
+        <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path fill="currentColor" d="M4 13h4v7H4v-7zm6-9h4v16h-4V4zm6 5h4v11h-4V9z"/></svg>
+        Leaderboard
+      </a>
+    </div>
+
+    <dl class="hero__stats" aria-label="Benchmark at a glance">
+      <div><dt data-count="100">0</dt><dd>Websites</dd></div>
+      <div><dt data-count="18.4" data-suffix="M">0</dt><dd>Documents</dd></div>
+      <div><dt data-count="4">0</dt><dd>Web Tasks</dd></div>
+      <div><dt data-count="3">0</dt><dd>Strategies</dd></div>
+    </dl>
+  </div>
+  <a href="#abstract" class="hero__scroll" aria-label="Scroll to content"><span></span></a>
+</section>
+
+<!-- ============================= ABSTRACT ============================= -->
+<section class="section" id="abstract">
+  <div class="wrap reveal">
+    <span class="eyebrow">Abstract</span>
+    <p class="abstract">
+Agentic Web is an emerging paradigm where autonomous agents help users use online information. As the paradigm develops, content providers are also deploying agents to manage their data and serve it through controlled interfaces. This shift moves information access from centralized retrieval to decentralized coordination. To study this setting, we introduce AgentWebBench, a benchmark that evaluates how well a user agent synthesizes answers by interacting with website-specific content agents. We evaluate four tasks that cover common web information needs, spanning ranked retrieval (web search, web recommendation) and open-ended synthesis (question answering, deep research). Across seven advanced LLMs and three coordination strategies, multi-agent coordination generally lags behind centralized retrieval as expected, because user agent cannot directly access the corpus, but the gap shrinks with model scale and can even outperform centralized retrieval on question answering. This benchmark also enables us to study properties of the emerging paradigm of the digital world. We find that decentralized access concentrates traffic toward a small set of websites, test time scaling improves both interaction reliability and task performance, and strong results require sufficient interactions guided by careful planning. Finally, our failure analysis suggests that user agents need better planning and answer synthesis, while content agents need more reliable retrieval and evidence quality.
+    </p>
+    <div class="abstract__links">
+      <a href="https://github.com/cxcscmu/AgentWebBench" target="_blank" rel="noopener">Code, data &amp; APIs are released &rarr;</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= OVERVIEW ============================= -->
+<section class="section section--alt" id="overview">
+  <div class="wrap">
+    <header class="section__head section__head--wide reveal">
+      <span class="eyebrow">Overview</span>
+      <h2 class="nowrap-lg">From linked documents to coordinating agents</h2>
+      <p class="section__sub">
+        AgentWebBench formalizes the Agentic Web as a <b>decentralized information ecosystem</b>. Given a
+        user intent, a user agent selects relevant websites, queries their content agents through
+        agent-facing interfaces, and synthesizes the returned evidence into a final answer.
+      </p>
+    </header>
+
+    <figure class="figure figure--hero reveal">
+      <img src="assets/figures/introduction.png" alt="Overview of AgentWebBench: user intents across four tasks, a user agent that selects and queries content agents, content agents retrieving from proprietary domains, and an environment of 100 websites with 18.4M documents." loading="lazy" />
+      <figcaption>
+        <b>The AgentWebBench pipeline.</b> (a) User intents span four representative tasks. (b) A user agent
+        analyzes intent, selects and queries content agents, and synthesizes the response. (c) Content agents
+        retrieve within their proprietary domains. (d) The environment comprises 100 websites with 18.4M
+        documents, each managed by an independent content agent.
+      </figcaption>
+    </figure>
+
+    <div class="cards cards--3 reveal">
+      <article class="card card--contrib">
+        <span class="card__num">01</span>
+        <h3>The first Agentic-Web benchmark</h3>
+        <p>A comprehensive evaluation of agent performance across four common web tasks, providing a foundation for research in this emerging paradigm.</p>
+      </article>
+      <article class="card card--contrib">
+        <span class="card__num">02</span>
+        <h3>A decentralized architecture</h3>
+        <p>A user agent coordinates with many content agents. The decentralized setting generally trails the centralized baseline, but the gap narrows with scale and reverses on question answering.</p>
+      </article>
+      <article class="card card--contrib">
+        <span class="card__num">03</span>
+        <h3>Insight beyond accuracy</h3>
+        <p>We characterize ecosystem impact and improvement pathways: traffic concentration, test-time scaling, interaction efficiency, and failure analysis.</p>
+      </article>
+    </div>
+
+    <p class="overview__more reveal">
+      Explore the <a href="benchmark.html">benchmark design &rarr;</a> or jump straight to the
+      <a href="leaderboard.html">leaderboard &amp; analysis &rarr;</a>
+    </p>
+  </div>
+</section>
+
+<!-- ============================= CITE ============================= -->
+<section class="section section--alt" id="cite">
+  <div class="wrap reveal">
+    <span class="eyebrow">Citation</span>
+    <h2 class="cite__title">Cite AgentWebBench</h2>
+    <div class="bibtex">
+      <button class="bibtex__copy" id="copyBib" aria-label="Copy BibTeX">
+        <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v12h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+        <span id="copyBibLabel">Copy</span>
+      </button>
+<pre id="bibtex">@inproceedings{zhong2026agentwebbench,
+  title     = {AgentWebBench: Benchmarking Multi-Agent Coordination in Agentic Web},
+  author    = {Zhong, Shanshan and Shen, Kate and Xiong, Chenyan},
+  booktitle = {Proceedings of the 43rd International Conference on Machine Learning (ICML)},
+  year      = {2026},
+  url       = {https://github.com/cxcscmu/AgentWebBench}
+}</pre>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============================= FOOTER ============================= -->
+<footer class="footer">
+  <h2 class="sr-only">Site footer</h2>
+  <div class="wrap footer__inner">
+    <div class="footer__brand">
+      <span class="nav__name">AgentWeb<b>Bench</b></span>
+      <p>Benchmarking multi-agent coordination in the Agentic Web.</p>
+    </div>
+    <div class="footer__cols">
+      <div>
+        <h3>Paper</h3>
+        <a href="paper/latex/example_paper.pdf" target="_blank" rel="noopener">PDF</a>
+        <a href="index.html#abstract">Abstract</a>
+        <a href="index.html#cite">BibTeX</a>
+      </div>
+      <div>
+        <h3>Resources</h3>
+        <a href="https://github.com/cxcscmu/AgentWebBench" target="_blank" rel="noopener">GitHub</a>
+        <a href="leaderboard.html">Leaderboard</a>
+        <a href="benchmark.html">Benchmark</a>
+      </div>
+      <div>
+        <h3>Affiliations</h3>
+        <a href="https://lti.cs.cmu.edu" target="_blank" rel="noopener">CMU LTI</a>
+        <span>Anaxi Labs</span>
+      </div>
+    </div>
+  </div>
+  <div class="footer__bar">
+    <span>© 2026 AgentWebBench · Shanshan Zhong, Kate Shen, Chenyan Xiong</span>
+    <a href="#top">Back to top ↑</a>
+  </div>
+</footer>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/main.js"></script>
+</body>
+</html>

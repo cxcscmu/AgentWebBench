@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Leaderboard &amp; Analysis · AgentWebBench</title>
+<meta name="description" content="AgentWebBench main results: seven LLMs across four coordination settings on web search, recommendation, QA, and deep research, plus analysis of traffic concentration, test-time scaling, efficiency, and failure modes." />
+<meta name="author" content="Shanshan Zhong, Kate Shen, Chenyan Xiong" />
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='5' fill='%234f46e5'/%3E%3Ccircle cx='5' cy='6' r='2.6' fill='%23f59e0b'/%3E%3Ccircle cx='27' cy='6' r='2.6' fill='%23f59e0b'/%3E%3Ccircle cx='5' cy='26' r='2.6' fill='%23f59e0b'/%3E%3Ccircle cx='27' cy='26' r='2.6' fill='%23f59e0b'/%3E%3Cg stroke='%234f46e5' stroke-width='1.4' opacity='.55'%3E%3Cline x1='16' y1='16' x2='5' y2='6'/%3E%3Cline x1='16' y1='16' x2='27' y2='6'/%3E%3Cline x1='16' y1='16' x2='5' y2='26'/%3E%3Cline x1='16' y1='16' x2='27' y2='26'/%3E%3C/g%3E%3C/svg%3E" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+<!-- ============================= NAV ============================= -->
+<header class="nav" id="nav">
+  <div class="nav__inner">
+    <a href="index.html" class="nav__brand" aria-label="AgentWebBench home">
+      <span class="nav__logo" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="26" height="26">
+          <g class="logo-edges" stroke="currentColor" stroke-width="1.4" opacity=".5">
+            <line x1="16" y1="16" x2="5" y2="6"/><line x1="16" y1="16" x2="27" y2="6"/>
+            <line x1="16" y1="16" x2="5" y2="26"/><line x1="16" y1="16" x2="27" y2="26"/>
+          </g>
+          <circle cx="16" cy="16" r="5" class="logo-hub"/>
+          <circle cx="5" cy="6" r="2.6" class="logo-node"/><circle cx="27" cy="6" r="2.6" class="logo-node"/>
+          <circle cx="5" cy="26" r="2.6" class="logo-node"/><circle cx="27" cy="26" r="2.6" class="logo-node"/>
+        </svg>
+      </span>
+      <span class="nav__name">AgentWeb<b>Bench</b></span>
+    </a>
+
+    <nav class="nav__links" aria-label="Section navigation">
+      <a href="index.html">Overview</a>
+      <a href="benchmark.html">Benchmark</a>
+      <a href="leaderboard.html" class="active">Leaderboard</a>
+    </nav>
+
+    <div class="nav__actions">
+      <a class="btn btn--ghost btn--sm" href="https://github.com/cxcscmu/AgentWebBench" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2 0 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z"/></svg>
+        <span>Code</span>
+      </a>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0-13a1 1 0 0 1 1 1V4a1 1 0 0 1-2 0V5a1 1 0 0 1 1-1zm0 15a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0v-1a1 1 0 0 1 1-1zM4 12a1 1 0 0 1-1 1H2a1 1 0 0 1 0-2h1a1 1 0 0 1 1 1zm18 0a1 1 0 0 1-1 1h-1a1 1 0 0 1 0-2h1a1 1 0 0 1 1 1zM5.6 5.6a1 1 0 0 1 1.4 0l.7.7A1 1 0 1 1 6.3 7.7l-.7-.7a1 1 0 0 1 0-1.4zm11 11a1 1 0 0 1 1.4 0l.7.7a1 1 0 0 1-1.4 1.4l-.7-.7a1 1 0 0 1 0-1.4zm1.4-11a1 1 0 0 1 0 1.4l-.7.7a1 1 0 1 1-1.4-1.4l.7-.7a1 1 0 0 1 1.4 0zm-11 11a1 1 0 0 1 0 1.4l-.7.7a1 1 0 0 1-1.4-1.4l.7-.7a1 1 0 0 1 1.4 0z"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+      <button class="nav__burger" id="navBurger" aria-label="Open menu"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- ============================= LEADERBOARD ============================= -->
+<section class="section section--alt section--first" id="leaderboard">
+  <div class="wrap">
+    <header class="section__head section__head--wide reveal">
+      <span class="eyebrow">Leaderboard</span>
+      <h2>Main results</h2>
+      <p class="section__sub">
+        Seven LLMs × four coordination settings across all tasks. Pick a task, filter by strategy or model,
+        and sort any column. The per-column leader is marked <span class="legend-best">●&nbsp;best</span>;
+        runner-up <span class="legend-second">●&nbsp;2nd</span>. For Deep Research, <b>KPC</b> is
+        lower-is-better.
+      </p>
+    </header>
+
+    <div class="lb reveal">
+      <!-- Task tabs -->
+      <div class="lb__tabs" id="lbTasks" role="tablist" aria-label="Select task"></div>
+
+      <!-- Controls -->
+      <div class="lb__controls">
+        <div class="lb__filters" id="lbMethodFilters" aria-label="Filter by strategy"></div>
+        <div class="lb__right">
+          <label class="lb__check" id="lbClassicIRWrap">
+            <input type="checkbox" id="lbClassicIR" /> <span>Classic IR baseline</span>
+          </label>
+          <div class="lb__search">
+            <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M21 20l-5.6-5.6a7 7 0 1 0-1.4 1.4L20 21l1-1zM5 10a5 5 0 1 1 10 0 5 5 0 0 1-10 0z"/></svg>
+            <input type="search" id="lbSearch" placeholder="Filter models…" aria-label="Filter models" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <p class="lb__hint">Swipe the table horizontally to see all columns →</p>
+      <div class="lb__scroll" id="lbPanel" role="tabpanel" tabindex="0" aria-label="Leaderboard results">
+        <table class="lb__table" id="lbTable">
+          <thead id="lbHead"></thead>
+          <tbody id="lbBody"></tbody>
+        </table>
+      </div>
+
+      <p class="lb__note" id="lbNote"></p>
+    </div>
+
+    <!-- Five findings from the main table -->
+    <div class="findings-grid reveal">
+      <div class="finding">
+        <span class="finding__tag">Finding 1</span>
+        <p><b>Overall performance is modest.</b> AgentWebBench is challenging under decentralized access: the best agent only slightly beats classic IR on web search, and web recommendation stays near-zero.</p>
+      </div>
+      <div class="finding">
+        <span class="finding__tag">Finding 2</span>
+        <p><b>Website selection is a bottleneck.</b> Tool<sub>P</sub> often beats Tool<sub>E</sub> on web search, since LLM reasoning picks more relevant sites than embedding similarity.</p>
+      </div>
+      <div class="finding">
+        <span class="finding__tag">Finding 3</span>
+        <p><b>Content agents are less stable on retrieval-heavy tasks.</b> Tool<sub>P</sub> usually edges out Multi-Agent on web search; the gap fades on generative tasks.</p>
+      </div>
+      <div class="finding">
+        <span class="finding__tag">Finding 4</span>
+        <p><b>Multi-Agent is promising but task-dependent.</b> Lower on search and deep research, but the gap shrinks for strong models, and it <b>beats Classical on QA</b>.</p>
+      </div>
+      <div class="finding">
+        <span class="finding__tag">Finding 5</span>
+        <p><b>Model scale helps consistently.</b> Within Qwen3, performance rises with scale, especially on coordination-intensive QA.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= FINDINGS ============================= -->
+<section class="section" id="findings">
+  <div class="wrap">
+    <header class="section__head section__head--wide reveal">
+      <span class="eyebrow">Analysis</span>
+      <h2>Understanding the paradigm beyond accuracy</h2>
+      <p class="section__sub">Four lenses on how the Agentic Web behaves as a multi-agent ecosystem.</p>
+    </header>
+
+    <!-- 1. Traffic concentration -->
+    <div class="analysis reveal">
+      <div class="analysis__text">
+        <span class="analysis__kicker">Systemic impact</span>
+        <h3>Decentralized access concentrates web traffic</h3>
+        <p>
+          In the Classical setting, citations spread across many sources, from academic repositories to
+          community forums. Under multi-agent coordination, citations <b>concentrate on a small set of
+          domains</b> (e.g., <code>wikipedia.org</code>, <code>sciencedirect.com</code>).
+        </p>
+        <p>
+          Decentralized access acts as a strong filter: better planning repeatedly selects the most useful
+          sources and ignores the rest. This improves reliability but reduces source diversity, and may make
+          it harder for most content providers to be discovered.
+        </p>
+      </div>
+      <figure class="figure analysis__fig">
+        <img src="assets/figures/user_traffic.png" alt="Citation frequency of the 20 most-cited sources for Qwen3-4B and Gemini-3 on deep research, comparing Classical vs Multi-Agent." loading="lazy" />
+        <figcaption>Citation frequency of the 20 most-cited sources on deep research. Multi-Agent (blue) concentrates on a few high-coverage knowledge bases vs. Classical (yellow).</figcaption>
+      </figure>
+    </div>
+
+    <!-- 2. Test-time scaling -->
+    <div class="analysis analysis--rev reveal">
+      <div class="analysis__text">
+        <span class="analysis__kicker">Optimization</span>
+        <h3>Test-time scaling narrows the gap</h3>
+        <p>
+          Thinking mode consistently improves performance at both model scales. Letting agents simulate and
+          verify action sequences before execution yields more deliberate planning, which is crucial when an agent
+          must choose which content agents to query and when to stop.
+        </p>
+        <p>
+          It also <b>improves interaction reliability</b>, reducing malformed requests: explicit reasoning
+          acts as an internal check on protocol adherence.
+        </p>
+        <div class="stat-chips">
+          <div class="stat-chip"><b>1.0&rarr;26.8</b><span>N@3 on web search, Qwen3-4B (without&nbsp;&rarr;&nbsp;with thinking)</span></div>
+          <div class="stat-chip"><b>3.8&rarr;15.9</b><span>QA accuracy, Qwen3-4B (without&nbsp;&rarr;&nbsp;with thinking)</span></div>
+        </div>
+      </div>
+      <figure class="figure analysis__fig">
+        <img src="assets/figures/llm_effect_visualization.png" alt="Effect of test-time scaling: token length, N@3 / accuracy, and request validity with and without thinking mode." loading="lazy" />
+        <figcaption>With vs. without thinking: response length, task score, and request validity (% of successfully parsed requests).</figcaption>
+      </figure>
+    </div>
+
+    <!-- 3. Efficiency (full-width figure) -->
+    <div class="analysis-wide reveal">
+      <div class="analysis-wide__text">
+        <span class="analysis__kicker">Efficiency</span>
+        <h3>Coordination needs enough interactions</h3>
+        <p>
+          Efficiency is not about minimizing interactions. Gemini-3 contacts more agents and issues more
+          requests than Qwen3-4B, trading lower validity for broader coverage, and wins on most tasks. Yet
+          on web recommendation, Qwen3-4B interacts <i>more</i> without better results: quantity alone fails
+          when intent inference is unstable. This motivates <b>adaptive interaction budgeting</b> and
+          planning-aware coordination.
+        </p>
+      </div>
+      <figure class="figure figure--wide">
+        <img src="assets/figures/analysis_common_efficiency_violin.png" alt="Interaction efficiency violin plots across four tasks: turns, contacted agents, requests, and validity for Qwen3-4B vs Gemini-3." loading="lazy" />
+        <figcaption>Interaction efficiency across tasks: turns, #agents, #requests, and request validity for the weakest vs. strongest model.</figcaption>
+      </figure>
+    </div>
+
+    <!-- 4. Failure modes -->
+    <div class="analysis analysis--rev reveal">
+      <div class="analysis__text">
+        <span class="analysis__kicker">Failure modes</span>
+        <h3>Both sides need to improve</h3>
+        <p>
+          Failures split differently by model and task. On web search, Qwen models fail more on the
+          user-agent side, while DeepSeek, GPT-5, and Gemini-3 fail more on the content-agent side. On QA,
+          failures are mostly attributed to the user agent. Even when content agents return correct evidence,
+          the user agent can answer at the wrong granularity.
+        </p>
+      </div>
+      <div class="casebox">
+        <div class="casebox__head">Failure on Question Answering · Gemini-3</div>
+        <div class="casebox__body">
+          <p><b>Query:</b> In Plato's analogy of the sun, what element does he compare to the Form of the Good in enabling knowledge?</p>
+          <p><b>Ground truth:</b> <span class="ok">Light</span></p>
+          <p class="casebox__ev"><b>Evidence (Wikipedia &amp; Britannica):</b> “The Sun provides <u>light</u>, which allows the eye to see… the Form of the Good provides truth and reality, allowing the soul to understand.”</p>
+          <p><b>User-agent answer:</b> <span class="bad">The Sun ✗</span></p>
+          <p class="casebox__note">Correct evidence retrieved, but the agent picks the entity being compared instead of the enabling element, an <b>answer-synthesis error</b>.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Failure table -->
+    <div class="data-block reveal">
+      <h4 class="data-block__title">Failure attribution (%): user agent vs. content agents</h4>
+      <div class="data-block__scroll" id="failTable"></div>
+    </div>
+
+    <nav class="pagenav reveal" aria-label="Page navigation">
+      <a href="benchmark.html">← Benchmark</a>
+      <a href="index.html#cite">Cite this work →</a>
+    </nav>
+  </div>
+</section>
+
+</main>
+
+<!-- ============================= FOOTER ============================= -->
+<footer class="footer">
+  <h2 class="sr-only">Site footer</h2>
+  <div class="wrap footer__inner">
+    <div class="footer__brand">
+      <span class="nav__name">AgentWeb<b>Bench</b></span>
+      <p>Benchmarking multi-agent coordination in the Agentic Web.</p>
+    </div>
+    <div class="footer__cols">
+      <div>
+        <h3>Paper</h3>
+        <a href="paper/latex/example_paper.pdf" target="_blank" rel="noopener">PDF</a>
+        <a href="index.html#abstract">Abstract</a>
+        <a href="index.html#cite">BibTeX</a>
+      </div>
+      <div>
+        <h3>Resources</h3>
+        <a href="https://github.com/cxcscmu/AgentWebBench" target="_blank" rel="noopener">GitHub</a>
+        <a href="leaderboard.html">Leaderboard</a>
+        <a href="benchmark.html">Benchmark</a>
+      </div>
+      <div>
+        <h3>Affiliations</h3>
+        <a href="https://lti.cs.cmu.edu" target="_blank" rel="noopener">CMU LTI</a>
+        <span>Anaxi Labs</span>
+      </div>
+    </div>
+  </div>
+  <div class="footer__bar">
+    <span>© 2026 AgentWebBench · Shanshan Zhong, Kate Shen, Chenyan Xiong</span>
+    <a href="#top">Back to top ↑</a>
+  </div>
+</footer>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/main.js"></script>
+</body>
+</html>

@@ -91,7 +91,7 @@
     if (!cv || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const ctx = cv.getContext("2d");
     let w, h, dpr, nodes = [], raf;
-    const COUNT = () => Math.min(64, Math.round(window.innerWidth / 24));
+    const COUNT = () => Math.min(72, Math.round(window.innerWidth / 22));
     const mouse = { x: null, y: null };
     const LINK = 130, REACH = 200;   // node-node link distance; cursor reach
 
@@ -108,24 +108,23 @@
       resize();
       nodes = Array.from({ length: COUNT() }, () => ({
         x: Math.random() * w, y: Math.random() * h,
-        vx: (Math.random() - .5) * .25, vy: (Math.random() - .5) * .25,
-        r: Math.random() * 1.6 + 1, hub: Math.random() < .12,
+        bvx: (Math.random() - .5) * .5, bvy: (Math.random() - .5) * .5,  // perpetual gentle drift
+        r: Math.random() * 1.8 + 1.2, hub: Math.random() < .14,
       }));
     }
     function frame() {
       const rgb = brand();
       ctx.clearRect(0, 0, w, h);
-      // move — with a gentle pull toward the cursor when it is near
+      // move: perpetual gentle drift + an instantaneous pull toward the cursor when near
       for (const a of nodes) {
+        let vx = a.bvx, vy = a.bvy;
         if (mouse.x != null) {
           const dx = mouse.x - a.x, dy = mouse.y - a.y, d = Math.hypot(dx, dy);
-          if (d > 1 && d < REACH) { const f = (1 - d / REACH) * 0.04; a.vx += (dx / d) * f; a.vy += (dy / d) * f; }
+          if (d > 1 && d < REACH) { const f = (1 - d / REACH) * 1.6; vx += (dx / d) * f; vy += (dy / d) * f; }
         }
-        a.vx *= 0.99; a.vy *= 0.99;                                   // friction
-        const sp = Math.hypot(a.vx, a.vy); if (sp > 0.9) { a.vx = a.vx / sp * 0.9; a.vy = a.vy / sp * 0.9; }
-        a.x += a.vx; a.y += a.vy;
-        if (a.x < 0 || a.x > w) a.vx *= -1;
-        if (a.y < 0 || a.y > h) a.vy *= -1;
+        a.x += vx; a.y += vy;
+        if (a.x <= 0 || a.x >= w) a.bvx *= -1;
+        if (a.y <= 0 || a.y >= h) a.bvy *= -1;
         a.x = Math.max(0, Math.min(w, a.x)); a.y = Math.max(0, Math.min(h, a.y));
       }
       // node-to-node links
@@ -134,7 +133,7 @@
         for (let j = i + 1; j < nodes.length; j++) {
           const b = nodes[j], dx = a.x - b.x, dy = a.y - b.y, d = Math.hypot(dx, dy);
           if (d < LINK) {
-            ctx.strokeStyle = `rgba(${rgb},${(1 - d / LINK) * .18})`;
+            ctx.strokeStyle = `rgba(${rgb},${(1 - d / LINK) * .32})`;
             ctx.lineWidth = 1;
             ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
           }
@@ -157,7 +156,7 @@
       for (const n of nodes) {
         ctx.beginPath();
         ctx.arc(n.x, n.y, n.hub ? n.r + 1.4 : n.r, 0, Math.PI * 2);
-        ctx.fillStyle = n.hub ? `rgba(245,158,11,.85)` : `rgba(${rgb},.55)`;
+        ctx.fillStyle = n.hub ? `rgba(245,158,11,.9)` : `rgba(${rgb},.72)`;
         ctx.fill();
       }
       raf = requestAnimationFrame(frame);

@@ -139,6 +139,14 @@ code {
 }
 .section__sub { color: var(--ink-soft); font-size: 1.06rem; margin: 0; }
 
+/* Intro row with a paragraph on the left and a CTA on the right (leaderboard) */
+.lb-intro { display: flex; gap: 32px; align-items: center; justify-content: space-between; }
+.lb-intro .section__sub { flex: 1; }
+.lb-intro__cta { flex: none; }
+.lb-intro__cta svg { transition: transform .2s ease; }
+.lb-intro__cta:hover svg { transform: translateX(3px); }
+@media (max-width: 760px) { .lb-intro { flex-direction: column; align-items: flex-start; gap: 18px; } }
+
 .eyebrow {
   display: inline-block;
   font-size: .76rem;
@@ -234,7 +242,7 @@ html[data-theme="dark"] .icon-moon { display: block; }
     radial-gradient(1200px 500px at 50% -8%, rgba(var(--brand-rgb), .14), transparent 60%),
     radial-gradient(900px 420px at 85% 12%, rgba(var(--accent-rgb), .1), transparent 55%);
 }
-.hero__canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .55; }
+.hero__canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .78; }
 .hero__glow { position: absolute; left: 50%; top: -120px; width: 620px; height: 620px; transform: translateX(-50%);
   background: radial-gradient(circle, rgba(var(--brand-rgb), .22), transparent 65%); filter: blur(20px); pointer-events: none; }
 .hero__inner { position: relative; z-index: 2; max-width: 920px; margin: 0 auto; padding: 0 24px; }
@@ -247,8 +255,21 @@ html[data-theme="dark"] .icon-moon { display: block; }
   padding: .45em 1em; border-radius: 100px; box-shadow: var(--shadow-sm);
   text-decoration: none !important; margin-bottom: 26px;
 }
-.hero__venue .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px rgba(var(--accent-rgb), .2); animation: pulse 2.4s ease-in-out infinite; }
+.hero__venue .dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px rgba(var(--accent-rgb), .2); animation: pulse 2.4s ease-in-out infinite; }
 @keyframes pulse { 50% { box-shadow: 0 0 0 8px rgba(var(--accent-rgb), 0); } }
+/* On narrow screens the venue label wraps; make it a tidy rounded tag with the dot on the first line */
+@media (max-width: 640px) {
+  .hero__venue { align-items: flex-start; border-radius: 16px; line-height: 1.5; padding: .5em .95em; font-size: .78rem; }
+  .hero__venue .dot { margin-top: .42em; }
+}
+/* Keep the nav on one row on phones now that Paper + Code both live in the actions */
+@media (max-width: 560px) {
+  .nav__inner { gap: 8px; padding-left: 14px; padding-right: 14px; }
+  .nav__name { font-size: 1rem; }
+  .nav__actions { gap: 6px; }
+  .nav__actions .btn--sm { padding: .45em .6em; }
+  .theme-toggle, .nav__burger { width: 36px; height: 36px; }
+}
 
 .hero__title {
   font-family: var(--display); font-weight: 800;
@@ -260,7 +281,7 @@ html[data-theme="dark"] .icon-moon { display: block; }
 }
 .hero__tagline { font-family: var(--display); font-weight: 700; font-size: clamp(1.1rem, 3vw, 1.7rem); letter-spacing: -.015em; margin: 0 0 1.1rem; color: var(--ink); }
 .grad { background: linear-gradient(100deg, var(--brand), var(--accent)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-.hero__lead { max-width: 680px; margin: 0 auto 2rem; color: var(--ink-soft); font-size: 1.08rem; }
+.hero__lead { max-width: 700px; margin: 0 auto 2rem; color: var(--ink-soft); font-size: 1.08rem; }
 .hero__lead b { color: var(--ink); font-weight: 600; }
 
 .hero__authors { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: .2em 1.4em; padding: 0; margin: 0 0 .4rem; font-size: 1.06rem; font-weight: 600; }

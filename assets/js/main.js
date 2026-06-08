@@ -85,19 +85,22 @@
   }, { threshold: 0.6 });
   $$(".hero__stats dt").forEach(el => countIO.observe(el));
 
-  /* ---------------- Hero canvas: agent network ---------------- */
+  /* ---------------- Hero canvas: the Agentic Web ----------------
+     A live graph of content-agent nodes (a few high-degree hubs + many leaves),
+     with signal pulses that travel along edges and hop onward — agents relaying
+     information across the web. The cursor acts as a user agent that lights up and
+     queries the content agents around it. */
   (function heroNet() {
     const cv = $("#heroCanvas");
     if (!cv || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const ctx = cv.getContext("2d");
-    let w, h, dpr, nodes = [], raf;
-    const COUNT = () => Math.min(72, Math.round(window.innerWidth / 22));
+    let w, h, dpr, nodes = [], pulses = [], raf, tick = 0;
+    const COUNT = () => Math.min(70, Math.round(window.innerWidth / 24));
     const mouse = { x: null, y: null };
-    const LINK = 130, REACH = 200;   // node-node link distance; cursor reach
+    const LINK = 150, REACH = 210, MAXPULSE = 18;
+    const AMBER = "245,158,11";
 
-    function brand() {
-      return getComputedStyle(root).getPropertyValue("--brand-rgb").trim() || "79,70,229";
-    }
+    const brand = () => getComputedStyle(root).getPropertyValue("--brand-rgb").trim() || "79,70,229";
     function resize() {
       dpr = Math.min(2, window.devicePixelRatio || 1);
       w = cv.clientWidth; h = cv.clientHeight;
@@ -105,60 +108,114 @@
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
     function init() {
-      resize();
-      nodes = Array.from({ length: COUNT() }, () => ({
-        x: Math.random() * w, y: Math.random() * h,
-        bvx: (Math.random() - .5) * .5, bvy: (Math.random() - .5) * .5,  // perpetual gentle drift
-        r: Math.random() * 1.8 + 1.2, hub: Math.random() < .14,
-      }));
+      resize(); pulses = [];
+      nodes = Array.from({ length: COUNT() }, () => {
+        const hub = Math.random() < .16;                       // ~1 in 6 is a hub (an "agent")
+        return {
+          x: Math.random() * w, y: Math.random() * h,
+          bvx: (Math.random() - .5) * (hub ? .26 : .55),       // hubs drift slower (network anchors)
+          bvy: (Math.random() - .5) * (hub ? .26 : .55),
+          r: hub ? Math.random() * 1.6 + 3 : Math.random() * 1.4 + 1.2,
+          hub, deg: 0,
+        };
+      });
+    }
+    function addPulse(from, to, color) {
+      if (pulses.length < MAXPULSE) pulses.push({ from, to, t: 0, sp: .011 + Math.random() * .009, color });
     }
     function frame() {
       const rgb = brand();
+      tick++;
       ctx.clearRect(0, 0, w, h);
-      // move: perpetual gentle drift + an instantaneous pull toward the cursor when near
+
+      // move (perpetual drift + cursor pull) and reset per-frame degree
       for (const a of nodes) {
+        a.deg = 0;
         let vx = a.bvx, vy = a.bvy;
         if (mouse.x != null) {
           const dx = mouse.x - a.x, dy = mouse.y - a.y, d = Math.hypot(dx, dy);
-          if (d > 1 && d < REACH) { const f = (1 - d / REACH) * 1.6; vx += (dx / d) * f; vy += (dy / d) * f; }
+          if (d > 1 && d < REACH) { const f = (1 - d / REACH) * (a.hub ? .8 : 1.7); vx += dx / d * f; vy += dy / d * f; }
         }
         a.x += vx; a.y += vy;
         if (a.x <= 0 || a.x >= w) a.bvx *= -1;
         if (a.y <= 0 || a.y >= h) a.bvy *= -1;
         a.x = Math.max(0, Math.min(w, a.x)); a.y = Math.max(0, Math.min(h, a.y));
       }
-      // node-to-node links
+
+      // edges (proximity) — draw, and collect for pulse routing
+      const edges = [];
       for (let i = 0; i < nodes.length; i++) {
         const a = nodes[i];
         for (let j = i + 1; j < nodes.length; j++) {
           const b = nodes[j], dx = a.x - b.x, dy = a.y - b.y, d = Math.hypot(dx, dy);
           if (d < LINK) {
-            ctx.strokeStyle = `rgba(${rgb},${(1 - d / LINK) * .32})`;
-            ctx.lineWidth = 1;
+            a.deg++; b.deg++; edges.push([a, b]);
+            const hubEdge = a.hub || b.hub;
+            ctx.strokeStyle = `rgba(${rgb},${(1 - d / LINK) * (hubEdge ? .42 : .24)})`;
+            ctx.lineWidth = hubEdge ? 1.2 : .85;
             ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
           }
         }
       }
-      // cursor links + glowing pointer node
-      if (mouse.x != null) {
-        for (const n of nodes) {
-          const dx = n.x - mouse.x, dy = n.y - mouse.y, d = Math.hypot(dx, dy);
-          if (d < REACH) {
-            ctx.strokeStyle = `rgba(245,158,11,${(1 - d / REACH) * .5})`;
-            ctx.lineWidth = 1.1;
-            ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(mouse.x, mouse.y); ctx.stroke();
+
+      // signal pulses travelling through the web
+      if (edges.length && tick % 7 === 0) {
+        const e = edges[(Math.random() * edges.length) | 0];
+        if (Math.random() < .5) addPulse(e[0], e[1], rgb); else addPulse(e[1], e[0], rgb);
+      }
+      if (mouse.x != null && tick % 6 === 0) {                 // user agent queries nearby content agents
+        const near = nodes.filter(n => Math.hypot(n.x - mouse.x, n.y - mouse.y) < REACH);
+        if (near.length) addPulse({ x: mouse.x, y: mouse.y }, near[(Math.random() * near.length) | 0], AMBER);
+      }
+      for (let k = pulses.length - 1; k >= 0; k--) {
+        const p = pulses[k]; p.t += p.sp;
+        const x = p.from.x + (p.to.x - p.from.x) * p.t;
+        const y = p.from.y + (p.to.y - p.from.y) * p.t;
+        const bt = Math.max(0, p.t - .14);
+        const bx = p.from.x + (p.to.x - p.from.x) * bt, by = p.from.y + (p.to.y - p.from.y) * bt;
+        ctx.strokeStyle = `rgba(${p.color},.55)`; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(x, y); ctx.stroke();
+        ctx.fillStyle = `rgba(${p.color},.95)`;
+        ctx.beginPath(); ctx.arc(x, y, 2.2, 0, Math.PI * 2); ctx.fill();
+        if (p.t >= 1) {
+          pulses.splice(k, 1);
+          if (p.to.hub !== undefined && Math.random() < .5) {  // relay onward to a neighbour
+            const e = edges.find(g => g[0] === p.to || g[1] === p.to);
+            if (e) addPulse(p.to, e[0] === p.to ? e[1] : e[0], rgb);
           }
         }
-        ctx.beginPath(); ctx.arc(mouse.x, mouse.y, 3.4, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(245,158,11,.9)"; ctx.fill();
       }
-      // nodes
+
+      // cursor = user agent: link + ring the content agents in range, then draw the agent marker
+      if (mouse.x != null) {
+        for (const n of nodes) {
+          const d = Math.hypot(n.x - mouse.x, n.y - mouse.y);
+          if (d < REACH) {
+            const a = 1 - d / REACH;
+            ctx.strokeStyle = `rgba(${AMBER},${a * .55})`; ctx.lineWidth = 1.1;
+            ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(mouse.x, mouse.y); ctx.stroke();
+            ctx.strokeStyle = `rgba(${AMBER},${a * .5})`; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.arc(n.x, n.y, n.r + 3.5, 0, Math.PI * 2); ctx.stroke();
+          }
+        }
+        ctx.fillStyle = `rgba(${AMBER},.95)`;
+        ctx.beginPath(); ctx.arc(mouse.x, mouse.y, 4, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = `rgba(${AMBER},.5)`; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.arc(mouse.x, mouse.y, 8 + Math.sin(tick * .08) * 1.6, 0, Math.PI * 2); ctx.stroke();
+      }
+
+      // nodes — hubs get a soft halo; busier leaf nodes brighten
       for (const n of nodes) {
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, n.hub ? n.r + 1.4 : n.r, 0, Math.PI * 2);
-        ctx.fillStyle = n.hub ? `rgba(245,158,11,.9)` : `rgba(${rgb},.72)`;
-        ctx.fill();
+        if (n.hub) {
+          ctx.fillStyle = `rgba(${AMBER},.14)`;
+          ctx.beginPath(); ctx.arc(n.x, n.y, n.r + 5, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = `rgba(${AMBER},.95)`;
+        } else {
+          ctx.fillStyle = `rgba(${rgb},${.58 + Math.min(.34, n.deg * .07)})`;
+        }
+        ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2); ctx.fill();
       }
+
       raf = requestAnimationFrame(frame);
     }
     init(); frame();
@@ -166,7 +223,7 @@
     const setMouse = (cx, cy) => { const r = cv.getBoundingClientRect(); mouse.x = cx - r.left; mouse.y = cy - r.top; };
     hero.addEventListener("pointermove", e => setMouse(e.clientX, e.clientY));
     hero.addEventListener("pointerleave", () => { mouse.x = mouse.y = null; });
-    let t; window.addEventListener("resize", () => { clearTimeout(t); t = setTimeout(() => { cancelAnimationFrame(raf); init(); frame(); }, 200); });
+    let to; window.addEventListener("resize", () => { clearTimeout(to); to = setTimeout(() => { cancelAnimationFrame(raf); init(); frame(); }, 200); });
   })();
 
   /* ---------------- Task cards ---------------- */

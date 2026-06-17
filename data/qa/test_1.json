@@ -1,0 +1,30 @@
+[
+  {
+    "id": 0,
+    "question": "Which program funded the SUPPLY project involving EHA, when did the project start, and how long will it last?",
+    "answer": "The SUPPLY project that EHA is involved in is funded by the EU4Health program. It started on September 1, 2022, and lasts for 18 months.",
+    "root_url": "https://ehaweb.org/",
+    "info": {
+      "domain": "conference",
+      "source_website": [
+        "https://ehaweb.org/organization/newsroom/news-and-updates/eha-to-participate-in-an-eu-funded-project-supply/"
+      ],
+      "golden_path": [
+        "root->News & views->Read more"
+      ],
+      "type": "single_source",
+      "difficulty_level": "medium",
+      "lang": "en"
+    },
+    "type": "webwalkerqa",
+    "domain": "conference",
+    "difficulty_level": "medium",
+    "language": "en",
+    "source_websites": [
+      "https://ehaweb.org/organization/newsroom/news-and-updates/eha-to-participate-in-an-eu-funded-project-supply/"
+    ],
+    "golden_path": [
+      "root->News & views->Read more"
+    ]
+  }
+]

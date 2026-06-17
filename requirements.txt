@@ -1,0 +1,32 @@
+# AgentWebBench dependencies.
+# Pin critical versions to avoid known incompatibilities (see RUNNING_LOG.md).
+
+# --- tokenization ---
+transformers<5           # AutoTokenizer; >=5 breaks vllm 0.10.x (missing all_special_tokens_extended)
+
+# --- LLM clients ---
+openai
+google-genai             # `from google import genai` (lazy import in llm_client.py)
+vllm==0.10.1.1
+markupsafe
+
+# --- vLLM runtime deps (must pin to avoid 500 errors) ---
+prometheus-fastapi-instrumentator==7.0.2   # >=7.1 breaks vllm (_IncludedRouter has no 'path')
+fastapi<1.0              # compatible with prometheus-fastapi-instrumentator 7.0.2
+starlette<1.0            # compatible with fastapi <1.0
+
+# --- misc runtime ---
+python-dotenv            # `import dotenv`
+pydantic
+requests
+tqdm
+tiktoken
+
+# --- extras (evaluation / plots / analysis; install as needed) ---
+pandas
+matplotlib
+seaborn
+scikit-learn
+nltk
+crawl4ai                # for evaluation/deepresearch/eval_citation_async.py
+aiohttp

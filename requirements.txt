@@ -1,5 +1,4 @@
 # AgentWebBench dependencies.
-# Pin critical versions to avoid known incompatibilities (see RUNNING_LOG.md).
 
 # --- tokenization ---
 transformers<5           # AutoTokenizer; >=5 breaks vllm 0.10.x (missing all_special_tokens_extended)
@@ -28,5 +27,5 @@ matplotlib
 seaborn
 scikit-learn
 nltk
-crawl4ai                # for evaluation/deepresearch/eval_citation_async.py
+crawl4ai
 aiohttp
